@@ -2,7 +2,7 @@
   "name": "おさんぽ天気チェック",
   "short_name": "ぽんず散歩",
   "description": "ぽんずのお散歩向き時間をチェックする天気アプリ",
-  "start_url": "./",
+  "start_url": "/ponzu-walk-weather/",
   "display": "standalone",
   "background_color": "#EEF1EA",
   "theme_color": "#EEF1EA",
