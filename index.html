@@ -27,11 +27,10 @@
   --amber:#E5B65C;  --amber-s:#FBF1DC;
   --rose:#DD9A9A;   --rose-s:#FBEAE9;
   --lavender:#B6A4D6;
-  /* 4段階カラー */
-  --c-green:#4caf6e;  --c-green-s:#e6f5ec;  --c-green-b:#b7dfc5;
-  --c-yellow:#d4a017; --c-yellow-s:#fdf6dc;  --c-yellow-b:#f0d97a;
-  --c-orange:#e07840; --c-orange-s:#fdf0e6;  --c-orange-b:#f0b88a;
-  --c-red:#d94040;    --c-red-s:#fdeaea;     --c-red-b:#f0a0a0;
+  --c-green:#4caf6e;  --c-green-s:#e6f5ec;  --c-green-b:#9dd4b0;
+  --c-yellow:#c49a00; --c-yellow-s:#fdf6dc;  --c-yellow-b:#e8cc6a;
+  --c-orange:#d06030; --c-orange-s:#fdf0e6;  --c-orange-b:#e8a070;
+  --c-red:#c83030;    --c-red-s:#fdeaea;     --c-red-b:#e89090;
   --shadow:0 4px 18px rgba(48,50,45,.08);
   --shadow-sm:0 2px 8px rgba(48,50,45,.05);
 }
@@ -43,26 +42,26 @@ body{
   font-family:'Zen Kaku Gothic New','Hiragino Sans',sans-serif;
   -webkit-font-smoothing:antialiased;
 }
-.app{ max-width:480px; margin:0 auto; padding:20px 16px calc(40px + env(safe-area-inset-bottom)); }
+.app{ max-width:480px; margin:0 auto; padding:20px 0 40px; }
 
 /* ── header ── */
-.header{ margin-bottom:16px; display:flex; align-items:flex-start; justify-content:space-between; }
+.header{ padding:0 16px; margin-bottom:16px; display:flex; align-items:flex-start; justify-content:space-between; }
 .header-left{}
 .eyebrow{ margin:0 0 4px; font-size:11px; font-weight:700; letter-spacing:.18em; color:var(--muted); font-family:'Zen Maru Gothic',sans-serif; }
 h1{ margin:0 0 4px; font-size:22px; font-weight:900; font-family:'Zen Maru Gothic',sans-serif; }
 .location-line{ font-size:12px; color:var(--muted); }
-.settings-btn{
+.header-btns{ display:flex; flex-direction:column; gap:6px; align-items:flex-end; margin-top:2px; }
+.icon-btn{
   background:var(--soft); border:1px solid var(--line); border-radius:999px;
   padding:6px 10px; font-size:12px; cursor:pointer; color:var(--muted);
-  font-family:'Zen Kaku Gothic New',sans-serif; white-space:nowrap; flex-shrink:0;
-  margin-top:2px;
+  font-family:'Zen Kaku Gothic New',sans-serif; white-space:nowrap;
 }
-.settings-btn:active{ background:var(--line); }
+.icon-btn:active{ background:var(--line); }
 
 /* ── day tabs ── */
 .day-tabs{
   display:grid; grid-template-columns:1fr 1fr; gap:6px;
-  margin-bottom:16px;
+  margin:0 16px 16px;
 }
 .day-tab{
   border:1px solid var(--line); border-radius:14px;
@@ -76,45 +75,117 @@ h1{ margin:0 0 4px; font-size:22px; font-weight:900; font-family:'Zen Maru Gothi
 .day-tab.active{ background:var(--sage); border-color:var(--sage); color:#fff; }
 .day-tab.active .dt-label{ color:rgba(255,255,255,.8); }
 
-/* ── hero card (v6) ── */
-.hero{
-  background:var(--panel); border:2px solid var(--hero-border, var(--line));
-  border-radius:20px; padding:18px 18px 16px;
-  margin-bottom:14px; box-shadow:var(--shadow);
+/* ── 24h horizontal timeline ── */
+.timeline-wrap{
+  margin-bottom:16px;
+  overflow-x:scroll;
+  overflow-y:visible;
+  -webkit-overflow-scrolling:touch;
+  scroll-snap-type:x mandatory;
+  scrollbar-width:none;
+  padding:4px 16px 8px;
 }
-.hero-label{ font-size:11px; font-weight:700; letter-spacing:.12em; color:var(--muted); margin-bottom:6px; font-family:'Zen Maru Gothic',sans-serif; }
-.hero-main{ display:flex; align-items:center; gap:12px; }
-.hero-icon{ font-size:40px; line-height:1; flex-shrink:0; }
-.hero-text h2{ margin:0 0 4px; font-size:20px; font-weight:900; font-family:'Zen Maru Gothic',sans-serif; line-height:1.2; }
-.hero-text p{ margin:0; font-size:13px; color:var(--muted); line-height:1.5; }
+.timeline-wrap::-webkit-scrollbar{ display:none; }
+.timeline-row{
+  display:flex;
+  gap:8px;
+  width:max-content;
+}
 
-/* ── 24h chip grid ── */
-.timeline{ margin-bottom:14px; }
+.tl-card{
+  scroll-snap-align:start;
+  flex-shrink:0;
+  width:calc((100vw - 32px - 24px) / 4);
+  max-width:96px;
+  min-width:72px;
+  background:var(--panel);
+  border:2px solid var(--line);
+  border-radius:14px;
+  padding:8px 4px 7px;
+  text-align:center;
+  cursor:pointer;
+  transition:border-color .15s, background .15s, transform .15s;
+  -webkit-tap-highlight-color:transparent;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:3px;
+}
+.tl-card.past{ opacity:.38; }
+.tl-card.lv0{ border-color:var(--c-green-b); background:var(--c-green-s); }
+.tl-card.lv1{ border-color:var(--c-yellow-b); background:var(--c-yellow-s); }
+.tl-card.lv2{ border-color:var(--c-orange-b); background:var(--c-orange-s); }
+.tl-card.lv3{ border-color:var(--c-red-b); background:var(--c-red-s); }
+.tl-card.selected{
+  transform:scale(1.08);
+  box-shadow:0 4px 14px rgba(48,50,45,.18);
+  border-width:2.5px;
+}
+.tl-card.lv0.selected{ border-color:var(--c-green); }
+.tl-card.lv1.selected{ border-color:var(--c-yellow); }
+.tl-card.lv2.selected{ border-color:var(--c-orange); }
+.tl-card.lv3.selected{ border-color:var(--c-red); }
+
+.tl-hour{ font-size:12px; font-weight:700; color:var(--ink); font-family:'Zen Maru Gothic',sans-serif; }
+.tl-wi{ font-size:18px; line-height:1; }
+.tl-temp{ font-size:11px; font-weight:700; color:var(--ink); }
+.tl-badge{ font-size:14px; line-height:1; }
+
+/* ── 散歩ガイドカード ── */
+.guide-card{
+  margin:0 16px 14px;
+  background:var(--panel);
+  border:2px solid var(--line);
+  border-radius:20px;
+  padding:16px;
+  box-shadow:var(--shadow);
+}
+.guide-header{
+  display:flex; align-items:center; gap:10px; margin-bottom:12px;
+}
+.guide-big-badge{
+  font-size:28px; line-height:1; flex-shrink:0;
+}
+.guide-title-block{}
+.guide-title{
+  font-family:'Zen Maru Gothic',sans-serif;
+  font-size:16px; font-weight:900; margin:0 0 3px;
+}
+.guide-badge-label{
+  display:inline-block;
+  font-size:11px; font-weight:700; border-radius:999px;
+  padding:2px 10px; color:#fff;
+}
+.badge-green{ background:var(--c-green); }
+.badge-yellow{ background:var(--c-yellow); }
+.badge-orange{ background:var(--c-orange); }
+.badge-red{ background:var(--c-red); }
+
+.guide-stats{
+  display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;
+}
+.guide-stat{
+  background:var(--soft); border:1px solid var(--line);
+  border-radius:999px; padding:4px 12px; font-size:12px; font-weight:700;
+}
+.guide-comment{
+  font-size:13px; line-height:1.7; color:var(--ink);
+  padding:10px 12px; background:var(--soft); border-radius:10px;
+}
+
+/* ── section title ── */
 .section-title{
   font-family:'Zen Maru Gothic',sans-serif; font-size:13px; font-weight:900;
-  color:var(--muted); margin:0 0 8px; display:flex; align-items:center; gap:8px; letter-spacing:.05em;
+  color:var(--muted); margin:0 0 8px 16px; display:flex; align-items:center; gap:8px; letter-spacing:.05em;
+  padding-right:16px;
 }
 .section-title::after{ content:""; height:1px; flex:1; background:var(--line); }
-.chips24{
-  display:grid; grid-template-columns:repeat(6,1fr); gap:4px;
-}
-.chip24{
-  border-radius:10px; border:1px solid var(--line);
-  padding:6px 2px 5px; text-align:center; background:#fff;
-}
-.chip24.lv0{ background:var(--c-green-s); border-color:var(--c-green-b); }
-.chip24.lv1{ background:var(--c-yellow-s); border-color:var(--c-yellow-b); }
-.chip24.lv2{ background:var(--c-orange-s); border-color:var(--c-orange-b); }
-.chip24.lv3{ background:var(--c-red-s); border-color:var(--c-red-b); }
-.chip24.past{ opacity:.35; }
-.chip24 .c-hour{ font-size:10px; color:var(--muted); font-weight:700; display:block; }
-.chip24 .c-emoji{ font-size:14px; display:block; margin:2px 0 1px; line-height:1; }
 
 /* ── gear ── */
 .gear-section{ margin-bottom:14px; }
 .gear-card{
   background:var(--panel); border:1px solid var(--line);
-  border-radius:14px; padding:12px 14px; margin-bottom:8px;
+  border-radius:14px; padding:12px 14px; margin:0 16px 8px;
   box-shadow:var(--shadow-sm);
 }
 .gear-card-title{ font-size:12px; font-weight:700; color:var(--muted); margin-bottom:8px; font-family:'Zen Maru Gothic',sans-serif; }
@@ -129,32 +200,18 @@ h1{ margin:0 0 4px; font-size:22px; font-weight:900; font-family:'Zen Maru Gothi
   padding:2px 7px; white-space:nowrap; flex-shrink:0;
 }
 .badge-must{ background:var(--sage-s); color:var(--sage); border:1px solid var(--sage); }
-.badge-good{ background:var(--amber-s); color:#a07800; border:1px solid var(--amber); }
+.badge-good{ background:var(--amber-s); color:#967000; border:1px solid var(--amber); }
 .badge-rec{ background:var(--sky-s); color:#3a7aa0; border:1px solid var(--sky); }
 .gear-icon{ font-size:17px; line-height:1; flex-shrink:0; }
 .gear-label{ flex:1; }
 
-/* ── advice ── */
-.advice{
-  border-radius:14px; padding:12px 14px; margin-bottom:10px;
-  font-size:13px; line-height:1.6; border:1px solid transparent;
-}
-.advice.rain{ background:#EEF4FB; border-color:#9FC2E0; }
-.advice.heat{ background:var(--amber-s); border-color:var(--amber); }
-.advice.cold{ background:var(--sky-s); border-color:var(--sky); }
-.advice b{ display:block; margin-bottom:4px; font-family:'Zen Maru Gothic',sans-serif; }
-.advice ul{ margin:2px 0 0; padding:0 0 0 16px; font-size:12px; }
-.advice ul li{ margin-bottom:1px; }
-
 /* ── misc ── */
-.updated{ font-size:11px; color:var(--muted); margin:0 0 14px; }
 .loading{ text-align:center; color:var(--muted); padding:40px 0; font-size:14px; }
-.error{ background:var(--rose-s); border:1px solid var(--rose); border-radius:14px; padding:14px; font-size:13px; }
+.error{ background:var(--rose-s); border:1px solid var(--rose); border-radius:14px; padding:14px 16px; margin:0 16px; font-size:13px; }
 .error button{ margin-top:8px; border:1px solid var(--rose); background:#fff; border-radius:999px; padding:6px 14px; font-size:12px; font-weight:700; cursor:pointer; }
-.note{ font-size:11px; color:var(--muted); line-height:1.7; margin-top:18px; }
 .hidden{ display:none !important; }
 
-/* ── sensitivity modal ── */
+/* ── modals ── */
 .modal-backdrop{
   position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:200;
   display:flex; align-items:center; justify-content:center; padding:20px;
@@ -164,22 +221,35 @@ h1{ margin:0 0 4px; font-size:22px; font-weight:900; font-family:'Zen Maru Gothi
   background:#fff; border-radius:20px; padding:24px;
   max-width:340px; width:100%; box-shadow:0 8px 32px rgba(0,0,0,0.2);
 }
-.modal h2{ font-family:'Zen Maru Gothic',sans-serif; font-size:18px; font-weight:900; margin:0 0 6px; }
-.modal p{ font-size:13px; color:var(--muted); margin:0 0 16px; line-height:1.6; }
+.modal h2{ font-family:'Zen Maru Gothic',sans-serif; font-size:18px; font-weight:900; margin:0 0 8px; }
+.modal p{ font-size:13px; color:var(--muted); margin:0 0 16px; line-height:1.7; }
+.modal-close{
+  margin-top:16px; width:100%; padding:12px;
+  background:var(--soft); color:var(--ink); border:1px solid var(--line);
+  border-radius:12px; font-size:14px; font-weight:700;
+  font-family:'Zen Maru Gothic',sans-serif; cursor:pointer;
+}
+
+/* sensitivity modal */
 .sensitivity-opts{ display:grid; gap:8px; }
 .sens-btn{
   border:2px solid var(--line); border-radius:14px; padding:12px 14px;
   background:var(--soft); font-size:14px; font-family:'Zen Maru Gothic',sans-serif;
   font-weight:700; cursor:pointer; text-align:left; display:flex; align-items:center; gap:10px;
-  transition:border-color .15s, background .15s;
+  transition:border-color .15s, background .15s; width:100%;
 }
-.sens-btn:hover, .sens-btn.selected{ border-color:var(--sage); background:var(--sage-s); }
+.sens-btn:hover,.sens-btn.selected{ border-color:var(--sage); background:var(--sage-s); }
 .sens-btn .sens-sub{ font-size:11px; color:var(--muted); font-weight:400; display:block; margin-top:1px; }
 .modal-save{
   margin-top:16px; width:100%; padding:13px;
   background:var(--sage); color:#fff; border:none; border-radius:12px;
   font-size:15px; font-weight:700; font-family:'Zen Maru Gothic',sans-serif; cursor:pointer;
 }
+
+/* info modal */
+.info-list{ list-style:none; padding:0; margin:0 0 4px; }
+.info-list li{ font-size:13px; color:var(--ink); padding:4px 0; border-bottom:1px solid var(--line); }
+.info-list li:last-child{ border-bottom:none; }
 </style>
 </head>
 <body>
@@ -190,35 +260,46 @@ h1{ margin:0 0 4px; font-size:22px; font-weight:900; font-family:'Zen Maru Gothi
       <h1>🐾 ぽんずさんぽ</h1>
       <p class="location-line" id="locationLine">位置情報を取得中…</p>
     </div>
-    <button class="settings-btn" id="settingsBtn">⚙️ 暑さ・寒さ設定</button>
+    <div class="header-btns">
+      <button class="icon-btn" id="settingsBtn">⚙️ 暑さ・寒さ設定</button>
+      <button class="icon-btn" id="infoBtn">ℹ️ 判定基準</button>
+    </div>
   </div>
 
   <div class="day-tabs" id="dayTabs"></div>
-  <div id="main" class="loading">📍 位置情報を取得中…</div>
-
-  <p class="note">判定基準：気温・路面温度・湿度・UV指数・風速・降水確率。降水確率50%以上は🔴。<br>データ提供：Open-Meteo</p>
+  <div id="main" class="loading" style="padding:40px 16px">📍 位置情報を取得中…</div>
 </div>
 
-<!-- 暑さ・寒さ設定モーダル -->
-<div class="modal-backdrop" id="modalBackdrop">
+<!-- 暑さ寒さ設定モーダル -->
+<div class="modal-backdrop hidden" id="sensModal">
   <div class="modal">
     <h2>🐶 暑さ・寒さの感じ方</h2>
-    <p>ぽんずの体質に合わせて設定してね。後からいつでも変更できるよ。</p>
+    <p>わんちゃんの暑さ・寒さの感じ方を選んでね。後から変更できるよ。</p>
     <div class="sensitivity-opts" id="sensitivityOpts">
-      <button class="sens-btn" data-val="hot">
-        🥵 暑がり
-        <span class="sens-sub">暑さに弱い・夏に特に注意したい</span>
-      </button>
-      <button class="sens-btn" data-val="normal">
-        😊 標準
-        <span class="sens-sub">特に気にならない</span>
-      </button>
-      <button class="sens-btn" data-val="cold">
-        🥶 寒がり
-        <span class="sens-sub">寒さに弱い・冬に特に注意したい</span>
-      </button>
+      <button class="sens-btn" data-val="hot">🥵 暑がり<span class="sens-sub">暑さに弱い・夏に特に注意したい</span></button>
+      <button class="sens-btn" data-val="normal">😊 標準<span class="sens-sub">特に気にならない</span></button>
+      <button class="sens-btn" data-val="cold">🥶 寒がり<span class="sens-sub">寒さに弱い・冬に特に注意したい</span></button>
     </div>
-    <button class="modal-save" id="modalSave">保存する</button>
+    <button class="modal-save" id="sensSave">保存する</button>
+  </div>
+</div>
+
+<!-- 判定基準モーダル -->
+<div class="modal-backdrop hidden" id="infoModal">
+  <div class="modal">
+    <h2>ℹ️ 判定基準について</h2>
+    <p>快適度は以下をもとに算出しています。</p>
+    <ul class="info-list">
+      <li>🌡️ 気温・体感温度（風速補正）</li>
+      <li>🛣️ 路面温度（気温＋日射推定）</li>
+      <li>💧 湿度</li>
+      <li>☀️ UV指数</li>
+      <li>🌬️ 風速</li>
+      <li>☔ 降水確率・天気コード</li>
+      <li>🐶 わんちゃんの暑がり・寒がり設定</li>
+    </ul>
+    <p style="margin-top:12px;margin-bottom:0">データ提供：Open-Meteo</p>
+    <button class="modal-close" id="infoClose">閉じる</button>
   </div>
 </div>
 
@@ -230,98 +311,94 @@ const SNOW_CODES = new Set([71,73,75,77,85,86]);
 const LEVEL = { GREEN:0, YELLOW:1, ORANGE:2, RED:3 };
 const LEVEL_EMOJI = ['🟢','🟡','🟠','🔴'];
 const LEVEL_CLASS = ['lv0','lv1','lv2','lv3'];
+const LEVEL_LABEL = ['快適','少し注意','注意','危険'];
+const BADGE_CLS = ['badge-green','badge-yellow','badge-orange','badge-red'];
+
+const WEATHER_NAME = {
+  0:'快晴',1:'晴れ',2:'薄曇り',3:'くもり',
+  45:'霧',48:'霧',
+  51:'霧雨',53:'霧雨',55:'強い霧雨',56:'着氷性霧雨',57:'着氷性霧雨',
+  61:'小雨',63:'雨',65:'強い雨',66:'着氷性の雨',67:'着氷性の雨',
+  71:'小雪',73:'雪',75:'大雪',77:'細雪',
+  80:'にわか雨',81:'にわか雨',82:'激しいにわか雨',
+  85:'にわか雪',86:'にわか雪',
+  95:'雷雨',96:'雷雨',99:'激しい雷雨',
+};
 
 // ── dogProfile ────────────────────────────────────────────
-// heatSensitivity: 'hot'|'normal'|'cold'
-// coldSensitivity は heatSensitivity と連動（暑がり → 寒さ耐性強め → 補正なし）
-// 将来: breed, age, weight, coat, senior などを追加可能
-function loadProfile() {
-  try { return JSON.parse(localStorage.getItem('dogProfile')) || {}; } catch { return {}; }
-}
-function saveProfile(p) {
-  localStorage.setItem('dogProfile', JSON.stringify(p));
-}
+function loadProfile(){ try{ return JSON.parse(localStorage.getItem('dogProfile'))||{}; }catch{ return{}; } }
+function saveProfile(p){ localStorage.setItem('dogProfile',JSON.stringify(p)); }
 let dogProfile = loadProfile();
 
-// 補正値取得
-function getSensitivityOffset() {
-  const s = dogProfile.heatSensitivity || 'normal';
-  // 暑がり: 暑さ閾値を -2℃（より早く警戒）, 寒さ閾値を +0
-  // 寒がり: 暑さ閾値を +0, 寒さ閾値を +2℃（より早く警戒）
-  return {
-    heat: s === 'hot' ? -2 : 0,
-    cold: s === 'cold' ? 2 : 0,
-  };
+function getSensitivityOffset(){
+  const s = dogProfile.heatSensitivity||'normal';
+  return { heat: s==='hot'?-2:0, cold: s==='cold'?2:0 };
 }
 
-// ── 天気アイコン ──────────────────────────────────────────
-function wIcon(code) {
-  if(code===0)return"☀️"; if(code===1)return"🌤️"; if(code===2)return"⛅"; if(code===3)return"☁️";
-  if(code===45||code===48)return"🌫️";
-  if([51,53,55,56,57].includes(code))return"🌦️";
-  if([61,63,65,66,67,80,81,82].includes(code))return"🌧️";
-  if(SNOW_CODES.has(code))return"🌨️";
-  if([95,96,99].includes(code))return"⛈️";
-  return"❓";
+// ── 天気 ─────────────────────────────────────────────────
+function wIcon(code){
+  if(code===0)return'☀️'; if(code===1)return'🌤️'; if(code===2)return'⛅'; if(code===3)return'☁️';
+  if(code===45||code===48)return'🌫️';
+  if([51,53,55,56,57].includes(code))return'🌦️';
+  if([61,63,65,66,67,80,81,82].includes(code))return'🌧️';
+  if(SNOW_CODES.has(code))return'🌨️';
+  if([95,96,99].includes(code))return'⛈️';
+  return'❓';
 }
+function wName(code){ return WEATHER_NAME[code]||'不明'; }
 
-// ── 路面温度推定 ─────────────────────────────────────────
-function roadTemp(temp, code) {
-  return temp + (code===0?12 : code===1?8 : code===2?5 : code===3?2 : 0);
-}
+// ── 路面・体感 ────────────────────────────────────────────
+function roadTemp(temp,code){ return temp+(code===0?12:code===1?8:code===2?5:code===3?2:0); }
+function feelsLike(temp,wind){ return temp-Math.min(wind*0.5,5); }
 
-// ── 体感温度（簡易ウィンドチル） ─────────────────────────
-function feelsLikeCold(temp, wind) {
-  return temp - Math.min(wind * 0.5, 5);
-}
-
-// ── 4段階快適度判定 ──────────────────────────────────────
-function calcLevel({ temp, code, precip, humidity, wind, uv }) {
+// ── 快適度判定（cause付き） ──────────────────────────────
+// returns { level:0-3, cause:'heat'|'cold'|'rain'|'none' }
+function calcLevel({ temp, code, precip, humidity, wind, uv }){
   const off = getSensitivityOffset();
 
-  // 雨・雪 → 即🔴
-  if (RAIN_CODES.has(code) || precip >= 50) return LEVEL.RED;
+  if(RAIN_CODES.has(code)||precip>=50) return { level:LEVEL.RED, cause:'rain' };
 
-  const road = roadTemp(temp, code);
-  const feels = feelsLikeCold(temp, wind);
+  const road = roadTemp(temp,code);
+  const fl = feelsLike(temp,wind);
+  const ho = off.heat, co = off.cold;
 
-  // 暑さ判定（閾値に heat オフセット適用）
-  function heatLevel() {
-    const ho = off.heat; // 暑がりなら -2（閾値が下がる）
-    if (road >= 42+ho || temp >= 31+ho || (temp >= 28+ho && humidity >= 80)) return LEVEL.RED;
-    if (road >= 36+ho || temp >= 28+ho || (temp >= 25+ho && (uv||0) >= 7)) return LEVEL.ORANGE;
-    if (temp >= 25+ho || road >= 30+ho || (uv||0) >= 6) return LEVEL.YELLOW;
+  function heatLv(){
+    if(road>=42+ho||temp>=31+ho||(temp>=28+ho&&humidity>=80)) return LEVEL.RED;
+    if(road>=36+ho||temp>=28+ho||(temp>=25+ho&&(uv||0)>=7)) return LEVEL.ORANGE;
+    if(temp>=25+ho||road>=30+ho||(uv||0)>=6) return LEVEL.YELLOW;
+    return LEVEL.GREEN;
+  }
+  function coldLv(){
+    if(fl<=-2+co) return LEVEL.RED;
+    if(fl<=2+co||(temp<=5+co&&wind>=8)) return LEVEL.ORANGE;
+    if(fl<=7+co) return LEVEL.YELLOW;
     return LEVEL.GREEN;
   }
 
-  // 寒さ判定（閾値に cold オフセット適用）
-  function coldLevel() {
-    const co = off.cold; // 寒がりなら +2（閾値が上がる）
-    if (feels <= -2+co) return LEVEL.RED;
-    if (feels <= 2+co || (temp <= 5+co && wind >= 8)) return LEVEL.ORANGE;
-    if (feels <= 7+co) return LEVEL.YELLOW;
-    return LEVEL.GREEN;
-  }
-
-  return Math.max(heatLevel(), coldLevel());
+  const hl = heatLv(), cl = coldLv();
+  if(hl>=cl) return { level:hl, cause: hl>LEVEL.GREEN?'heat':'none' };
+  return { level:cl, cause: cl>LEVEL.GREEN?'cold':'none' };
 }
 
-// ── 雨上がり判定 ─────────────────────────────────────────
-function checkRainAfter(data, nowHour) {
-  for (let h = Math.max(0, nowHour-3); h < nowHour; h++) {
-    if (data[h] && RAIN_CODES.has(data[h].code)) return true;
+// ── 雨上がり ─────────────────────────────────────────────
+function checkRainBefore(data, h){
+  for(let i=Math.max(0,h-3);i<h;i++){
+    if(data[i]&&RAIN_CODES.has(data[i].code)) return true;
   }
   return false;
 }
 
+// ── 夜判定 ───────────────────────────────────────────────
+function isNight(h){ return h>=19||h<5; }
+
 // ── 位置情報 ─────────────────────────────────────────────
-function getLocation() {
-  return new Promise(resolve => {
-    if (!('geolocation' in navigator)) { resolve({lat:FALLBACK_LAT,lon:FALLBACK_LON,source:'fallback'}); return; }
+function getLocation(){
+  return new Promise(resolve=>{
+    if(!('geolocation' in navigator)){ resolve({lat:FALLBACK_LAT,lon:FALLBACK_LON,source:'fallback'}); return; }
     navigator.geolocation.getCurrentPosition(
-      p => resolve({lat:p.coords.latitude, lon:p.coords.longitude, source:'gps'}),
-      () => resolve({lat:FALLBACK_LAT, lon:FALLBACK_LON, source:'fallback'}),
-      {enableHighAccuracy:false, timeout:8000, maximumAge:600000}
+      p=>resolve({lat:p.coords.latitude,lon:p.coords.longitude,source:'gps'}),
+      ()=>resolve({lat:FALLBACK_LAT,lon:FALLBACK_LON,source:'fallback'}),
+      {enableHighAccuracy:false,timeout:8000,maximumAge:600000}
     );
   });
 }
@@ -329,73 +406,60 @@ function getLocation() {
 // ── 状態 ─────────────────────────────────────────────────
 let appData = null;
 let activeDay = 0;
+let selectedHour = null;
 
 // ── メインロード ─────────────────────────────────────────
-async function loadForecast() {
-  const main = document.getElementById('main');
-  main.className = 'loading'; main.textContent = '📍 位置情報を取得中…';
-  try {
-    const loc = await getLocation();
-    main.textContent = '⛅ 天気予報を取得中…';
+async function loadForecast(){
+  const main=document.getElementById('main');
+  main.className='loading'; main.style.padding='40px 16px'; main.textContent='📍 位置情報を取得中…';
+  try{
+    const loc=await getLocation();
+    main.textContent='⛅ 天気予報を取得中…';
 
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}`
-      + `&hourly=temperature_2m,precipitation_probability,weathercode,relative_humidity_2m,wind_speed_10m,uv_index`
-      + `&timezone=Asia%2FTokyo&forecast_days=2`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error();
-    const data = await res.json();
+    const url=`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}`
+      +`&hourly=temperature_2m,precipitation_probability,weathercode,relative_humidity_2m,wind_speed_10m,uv_index`
+      +`&timezone=Asia%2FTokyo&forecast_days=2`;
+    const res=await fetch(url);
+    if(!res.ok) throw new Error();
+    const data=await res.json();
 
-    const { time, temperature_2m, precipitation_probability, weathercode,
-            relative_humidity_2m, wind_speed_10m, uv_index } = data.hourly;
-
-    const byDate = {};
-    time.forEach((t, idx) => {
-      const [dp, tp] = t.split('T'); const h = parseInt(tp);
-      if (!byDate[dp]) byDate[dp] = {};
-      byDate[dp][h] = {
-        temp: temperature_2m[idx],
-        code: weathercode[idx],
-        precip: precipitation_probability[idx],
-        humidity: relative_humidity_2m[idx],
-        wind: wind_speed_10m[idx],
-        uv: uv_index[idx],
-      };
+    const {time,temperature_2m,precipitation_probability,weathercode,relative_humidity_2m,wind_speed_10m,uv_index}=data.hourly;
+    const byDate={};
+    time.forEach((t,idx)=>{
+      const [dp,tp]=t.split('T'); const h=parseInt(tp);
+      if(!byDate[dp]) byDate[dp]={};
+      byDate[dp][h]={temp:temperature_2m[idx],code:weathercode[idx],precip:precipitation_probability[idx],
+        humidity:relative_humidity_2m[idx],wind:wind_speed_10m[idx],uv:uv_index[idx]};
     });
 
-    const now = new Date(), pad = n => String(n).padStart(2,'0');
-    const mkStr = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-    const tom = new Date(now.getTime()+86400000);
-    const todayStr = mkStr(now), tomStr = mkStr(tom);
-    const nowInfo = { dateStr:todayStr, hour:now.getHours() };
-    const dowL = ['日','月','火','水','木','金','土'];
-
-    const days = [
-      { dateStr:todayStr, date:now, label:'今日', dow:dowL[now.getDay()] },
-      { dateStr:tomStr,   date:tom, label:'明日', dow:dowL[tom.getDay()] },
+    const now=new Date(), pad=n=>String(n).padStart(2,'0');
+    const mkStr=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    const tom=new Date(now.getTime()+86400000);
+    const dowL=['日','月','火','水','木','金','土'];
+    const days=[
+      {dateStr:mkStr(now),date:now,label:'今日',dow:dowL[now.getDay()]},
+      {dateStr:mkStr(tom),date:tom,label:'明日',dow:dowL[tom.getDay()]},
     ];
+    appData={byDate,days,nowInfo:{dateStr:mkStr(now),hour:now.getHours()},loc};
 
-    appData = { byDate, days, nowInfo, loc };
-
-    const locLabel = loc.source==='gps' ? '現在地' : '東京（デフォルト）';
-    document.getElementById('locationLine').textContent =
-      `📍 ${locLabel} ／ ${now.getMonth()+1}/${now.getDate()} ${pad(now.getHours())}:${pad(now.getMinutes())}取得`;
+    const locLabel=loc.source==='gps'?'現在地':'東京（デフォルト）';
+    document.getElementById('locationLine').textContent=`📍 ${locLabel} ／ ${now.getMonth()+1}/${now.getDate()} ${pad(now.getHours())}:${pad(now.getMinutes())}取得`;
 
     renderDayTabs();
     renderDay(0);
-
-  } catch(e) {
-    main.className = '';
-    main.innerHTML = `<div class="error">天気予報を取得できなかったよ。<br><button onclick="loadForecast()">再読み込み</button></div>`;
+  }catch(e){
+    main.className=''; main.style.padding='';
+    main.innerHTML=`<div class="error">天気予報を取得できなかったよ。<br><button onclick="loadForecast()">再読み込み</button></div>`;
   }
 }
 
-// ── タブ描画 ─────────────────────────────────────────────
-function renderDayTabs() {
-  const el = document.getElementById('dayTabs');
-  const { byDate, days } = appData;
-  el.innerHTML = days.map((day, i) => {
-    const data = byDate[day.dateStr] || {};
-    const repCode = data[12] ? data[12].code : (data[9] ? data[9].code : 0);
+// ── タブ ─────────────────────────────────────────────────
+function renderDayTabs(){
+  const el=document.getElementById('dayTabs');
+  const {byDate,days}=appData;
+  el.innerHTML=days.map((day,i)=>{
+    const data=byDate[day.dateStr]||{};
+    const repCode=data[12]?data[12].code:(data[9]?data[9].code:0);
     return `<button class="day-tab${i===activeDay?' active':''}" onclick="renderDay(${i})">
       <div class="dt-label">${day.label}（${day.dow}）</div>
       <div class="dt-weather">${wIcon(repCode)}</div>
@@ -405,150 +469,215 @@ function renderDayTabs() {
 }
 
 // ── 日別描画 ─────────────────────────────────────────────
-function renderDay(idx) {
-  activeDay = idx;
-  document.querySelectorAll('.day-tab').forEach((t,i) => t.classList.toggle('active', i===idx));
+function renderDay(idx){
+  activeDay=idx;
+  document.querySelectorAll('.day-tab').forEach((t,i)=>t.classList.toggle('active',i===idx));
 
-  const { byDate, days, nowInfo } = appData;
-  const day = days[idx];
-  const data = byDate[day.dateStr] || {};
-  const nowHour = nowInfo.hour;
-  const isToday = day.dateStr === nowInfo.dateStr;
-  const rainAfter = isToday && checkRainAfter(data, nowHour);
+  const {byDate,days,nowInfo}=appData;
+  const day=days[idx];
+  const data=byDate[day.dateStr]||{};
+  const isToday=day.dateStr===nowInfo.dateStr;
+  const nowHour=nowInfo.hour;
 
-  // 全24時間の判定
-  const hours = Array.from({length:24}, (_, h) => {
-    const d = data[h];
-    if (!d) return { h, level: LEVEL.RED, d: null, isPast: isToday && h < nowHour };
-    const level = calcLevel(d);
-    const isPast = isToday && h < nowHour;
-    return { h, level, d, isPast };
-  });
-
-  // ベスト時間（未来・非雨）
-  const future = hours.filter(x => !x.isPast && x.d && x.level < LEVEL.RED);
-  const bestHour = future.length ? future.reduce((a,b) => a.level <= b.level ? a : b) : null;
-
-  const main = document.getElementById('main');
-  main.className = '';
-
-  let html = '';
-  html += buildHero(bestHour, isToday, hours);
-  html += buildTimeline24(hours);
-  html += buildGear(data, nowHour, hours, isToday, rainAfter);
-  html += buildAdvice(data, nowHour, hours, isToday, rainAfter);
-
-  main.innerHTML = html;
-}
-
-// ── Hero カード ──────────────────────────────────────────
-function buildHero(bestHour, isToday, hours) {
-  const label = isToday ? "TODAY'S BEST" : "TOMORROW'S BEST";
-
-  if (!bestHour) {
-    return `<div class="hero" style="--hero-border:var(--c-red-b)">
-      <div class="hero-label">${label}</div>
-      <div class="hero-main">
-        <div class="hero-icon">🔴</div>
-        <div class="hero-text">
-          <h2>今日の散歩は避けてね</h2>
-          <p>雨・高温・強風などにより<br>お散歩に向かない状況が続いています</p>
-        </div>
-      </div>
-    </div>`;
+  // 初期選択時間
+  if(isToday){
+    // 現在時刻の次の時間（なければ現在時刻）
+    selectedHour=(nowHour+1<=23)?nowHour+1:nowHour;
+  } else {
+    selectedHour=0;
   }
 
-  const lv = bestHour.level;
-  const icons = ['🟢','🟡','🟠','🔴'];
-  const borders = ['var(--c-green-b)','var(--c-yellow-b)','var(--c-orange-b)','var(--c-red-b)'];
-  const msgs = [
-    ['今日は最高の散歩日和！', 'お散歩に向いている時間があるよ'],
-    ['様子を見ながら行けるよ', '少し暑め／寒めだけど無理なく'],
-    ['注意しながらなら行けるかも', '短めにして無理しないで'],
-    ['散歩は厳しそうな時間帯が多い', '無理せず今日はお休みでもいいよ'],
-  ];
-  const [msg1, msg2] = msgs[lv];
+  const main=document.getElementById('main');
+  main.className=''; main.style.padding='';
+  main.innerHTML=`
+    <div id="timeline-section"></div>
+    <div id="guide-section"></div>
+    <div id="gear-section"></div>
+  `;
 
-  return `<div class="hero" style="--hero-border:${borders[lv]}">
-    <div class="hero-label">${label}</div>
-    <div class="hero-main">
-      <div class="hero-icon">${icons[lv]}</div>
-      <div class="hero-text">
-        <h2>${msg1}</h2>
-        <p>${msg2}${lv < LEVEL.RED ? `<br>${bestHour.h}時台がいちばんおすすめ 🐾` : ''}</p>
-      </div>
-    </div>
-  </div>`;
+  renderTimeline(data, isToday, nowHour);
+  renderGuide(data, isToday, nowHour);
+  renderGear(data, nowHour);
+
+  // 選択カードを中央にスクロール
+  requestAnimationFrame(()=>scrollToSelected());
 }
 
-// ── 24時間チップ ─────────────────────────────────────────
-function buildTimeline24(hours) {
-  const chips = hours.map(({ h, level, d, isPast }) => {
-    const emoji = d ? LEVEL_EMOJI[level] : '🔴';
-    return `<div class="chip24 ${LEVEL_CLASS[level]}${isPast?' past':''}">
-      <span class="c-hour">${h}時</span>
-      <span class="c-emoji">${emoji}</span>
+// ── タイムライン ─────────────────────────────────────────
+function renderTimeline(data, isToday, nowHour){
+  const hours=Array.from({length:24},(_,h)=>{
+    const d=data[h];
+    const {level}=d?calcLevel(d):{level:LEVEL.RED,cause:'rain'};
+    const isPast=isToday&&h<nowHour;
+    return {h,d,level,isPast};
+  });
+
+  const cards=hours.map(({h,d,level,isPast})=>{
+    const sel=h===selectedHour;
+    const wi=d?wIcon(d.code):'❓';
+    const temp=d?`${Math.round(d.temp)}°`:'--';
+    return `<div class="tl-card ${LEVEL_CLASS[level]}${isPast?' past':''}${sel?' selected':''}" id="tlc-${h}" onclick="selectHour(${h})">
+      <span class="tl-hour">${h}時</span>
+      <span class="tl-wi">${wi}</span>
+      <span class="tl-temp">${temp}</span>
+      <span class="tl-badge">${LEVEL_EMOJI[level]}</span>
     </div>`;
   }).join('');
 
-  return `<div class="timeline">
-    <div class="section-title">時間ごとの快適度</div>
-    <div class="chips24">${chips}</div>
-  </div>`;
+  document.getElementById('timeline-section').innerHTML=`
+    <div class="timeline-wrap" id="timelineWrap">
+      <div class="timeline-row">${cards}</div>
+    </div>`;
+}
+
+function scrollToSelected(){
+  const wrap=document.getElementById('timelineWrap');
+  const card=document.getElementById(`tlc-${selectedHour}`);
+  if(!wrap||!card) return;
+  const wrapRect=wrap.getBoundingClientRect();
+  const cardRect=card.getBoundingClientRect();
+  const target=wrap.scrollLeft+(cardRect.left-wrapRect.left)-(wrapRect.width/2)+(cardRect.width/2);
+  wrap.scrollTo({left:Math.max(0,target),behavior:'smooth'});
+}
+
+function selectHour(h){
+  selectedHour=h;
+  const {byDate,days,nowInfo}=appData;
+  const day=days[activeDay];
+  const data=byDate[day.dateStr]||{};
+  const isToday=day.dateStr===nowInfo.dateStr;
+  const nowHour=nowInfo.hour;
+
+  // カードのselected更新
+  document.querySelectorAll('.tl-card').forEach(c=>{
+    const ch=parseInt(c.id.replace('tlc-',''));
+    c.classList.toggle('selected',ch===h);
+  });
+  scrollToSelected();
+
+  renderGuide(data, isToday, nowHour);
+  renderGear(data, nowHour);
+}
+
+// ── 散歩ガイド ────────────────────────────────────────────
+function renderGuide(data, isToday, nowHour){
+  const h=selectedHour;
+  const d=data[h];
+  const isPast=isToday&&h<nowHour;
+  const rainBefore=isToday&&checkRainBefore(data,h);
+
+  let html='';
+  if(!d){
+    html=`<div class="guide-card" style="border-color:var(--c-red-b)">
+      <div class="guide-header">
+        <span class="guide-big-badge">🔴</span>
+        <div class="guide-title-block">
+          <p class="guide-title">🐶 ${h}時のお散歩ガイド</p>
+          <span class="guide-badge-label badge-red">データなし</span>
+        </div>
+      </div>
+    </div>`;
+  } else {
+    const {level,cause}=calcLevel(d);
+    const road=Math.round(roadTemp(d.temp,d.code));
+    const borderColors=['var(--c-green-b)','var(--c-yellow-b)','var(--c-orange-b)','var(--c-red-b)'];
+    const comment=buildComment(level,cause,d,h,isPast,rainBefore);
+
+    html=`<div class="guide-card" style="border-color:${borderColors[level]}">
+      <div class="guide-header">
+        <span class="guide-big-badge">${LEVEL_EMOJI[level]}</span>
+        <div class="guide-title-block">
+          <p class="guide-title">🐶 ${h}時のお散歩ガイド</p>
+          <span class="guide-badge-label ${BADGE_CLS[level]}">${LEVEL_LABEL[level]}</span>
+        </div>
+      </div>
+      <div class="guide-stats">
+        <span class="guide-stat">${wIcon(d.code)} ${wName(d.code)}</span>
+        <span class="guide-stat">🌡️ ${Math.round(d.temp)}℃</span>
+        <span class="guide-stat">🛣️ 路面${road}℃</span>
+        <span class="guide-stat">💧 湿度${d.humidity}%</span>
+      </div>
+      <div class="guide-comment">${comment}</div>
+    </div>`;
+  }
+  document.getElementById('guide-section').innerHTML=html;
+}
+
+function buildComment(level,cause,d,h,isPast,rainBefore){
+  const past=isPast?'（過去の時間です）':'';
+  if(level===LEVEL.RED){
+    if(cause==='rain') return `☔ 雨や雪が降っています。無理せずお家で遊ぶのもおすすめ。${past}`;
+    if(cause==='heat') return `🔥 非常に暑くて危険な時間帯です。散歩は避けて涼しい場所で過ごしてね。${past}`;
+    return `🌨️ 体感温度がとても低く危険です。無理せず今日はお家でゆっくりしよう。${past}`;
+  }
+  if(level===LEVEL.ORANGE){
+    if(cause==='heat') return `☀️ 熱中症や肉球やけどに注意しよう。アスファルトを手で触って確認してから出発してね。${past}`;
+    if(cause==='cold') return `🧊 防寒をしっかりしてね。短めのお散歩がおすすめ。${past}`;
+    return `⚠️ 天候に注意が必要です。様子を見ながら無理しないでね。${past}`;
+  }
+  if(level===LEVEL.YELLOW){
+    if(cause==='heat') return `🌤️ 少し暑めです。短めのお散歩がおすすめ。水を忘れずに。${past}`;
+    if(cause==='cold') return `🍃 少し肌寒いです。短めのお散歩がおすすめ。${past}`;
+    return `🙂 短めのお散歩がおすすめ。無理しない範囲で楽しんでね。${past}`;
+  }
+  // GREEN
+  if(rainBefore) return `🌈 雨上がりです。地面が濡れているかも。帰ったら足を拭いてあげてね。${past}`;
+  if(isNight(h)) return `🌙 夜の散歩です。ライトや反射材で安全に。${past}`;
+  if(d.wind>=5) return `💨 風が心地よい時間帯。お散歩日和だよ。${past}`;
+  if(d.humidity<60) return `😊 湿度も低くて過ごしやすい時間帯。思いっきり楽しんでね。${past}`;
+  return `🐾 涼しくて歩きやすいよ。お散歩日和！${past}`;
 }
 
 // ── 持ち物 ───────────────────────────────────────────────
-function buildGear(data, nowHour, hours, isToday, rainAfter) {
-  const future = hours.filter(x => !x.isPast && x.d);
-  const hasHot  = future.some(x => x.level >= LEVEL.ORANGE && x.d.temp >= 25);
-  const hasCold = future.some(x => x.level >= LEVEL.ORANGE && x.d.temp <= 5);
-  const hasHotYellow = future.some(x => x.level >= LEVEL.YELLOW && x.d.temp >= 22);
-  const hasNight = future.some(x => x.h >= 19 || x.h <= 5);
-  const hasRain = future.some(x => x.level === LEVEL.RED && x.d && (RAIN_CODES.has(x.d.code) || x.d.precip >= 50));
-  const hasSunny = future.some(x => x.d && (x.d.code === 0 || x.d.code === 1));
+function renderGear(data, nowHour){
+  const h=selectedHour;
+  const d=data[h];
+  if(!d){ document.getElementById('gear-section').innerHTML=''; return; }
 
-  // 🐶 犬用
-  const dogGear = [
-    { icon:'💩', label:'うんち袋', badge:'must' },
-    { icon:'🪣', label:'携帯水容器', badge:'must' },
-  ];
-  if (rainAfter) dogGear.push({ icon:'🧻', label:'足拭きタオル', badge:'must' });
-  else dogGear.push({ icon:'🧻', label:'足拭きタオル', badge:'good' });
-  if (hasSunny) dogGear.push({ icon:'🕶', label:'UVカット帽子', badge:'good' });
-  if (hasHotYellow) dogGear.push({ icon:'❄️', label:'冷感ネックリング', badge: hasHot ? 'must' : 'good' });
-  if (hasNight) dogGear.push({ icon:'💡', label:'ライト', badge:'rec' });
-  if (hasRain) dogGear.push({ icon:'☂️', label:'雨具・カッパ', badge:'rec' });
-  if (hasCold) dogGear.push({ icon:'🧥', label:'ぽんずのウェア', badge:'rec' });
+  const {level,cause}=calcLevel(d);
+  const night=isNight(h);
+  const rainBefore=checkRainBefore(data,h);
+  const isHot=cause==='heat'&&level>=LEVEL.YELLOW;
+  const isCold=cause==='cold'&&level>=LEVEL.YELLOW;
+  const isMorning=h>=5&&h<10;
 
-  // 👤 飼い主用
-  const ownerGear = [];
-  if (hasHot) {
-    ownerGear.push({ icon:'🧢', label:'帽子', badge:'good' });
-    ownerGear.push({ icon:'💧', label:'飲み物', badge:'good' });
-    ownerGear.push({ icon:'❄️', label:'冷感ネックリング・汗拭きタオル', badge:'rec' });
-  }
-  if (hasCold) {
-    ownerGear.push({ icon:'🧤', label:'手袋・ネックウォーマー', badge:'good' });
-    ownerGear.push({ icon:'🧥', label:'上着', badge:'good' });
-  }
-  if (rainAfter) {
-    ownerGear.push({ icon:'🧻', label:'タオル', badge:'must' });
-    ownerGear.push({ icon:'👟', label:'汚れてもよい靴', badge:'good' });
-  }
-  if (hasNight) {
-    ownerGear.push({ icon:'🔦', label:'ライト', badge:'must' });
-    ownerGear.push({ icon:'🦺', label:'反射材', badge:'good' });
-  }
-
-  const badgeMap = {
-    must: ['badge-must', '🟢 必須'],
-    good: ['badge-good', '🟡 あると良い'],
-    rec:  ['badge-rec',  '🔵 推奨'],
+  // 犬用
+  const dogItems=[];
+  const addDog=(icon,label,badge)=>{
+    if(!dogItems.find(x=>x.label===label)) dogItems.push({icon,label,badge});
   };
+  addDog('💩','うんち袋','must');
+  addDog('🪣','携帯水容器','must');
+  if(isHot){ addDog('🧊','保冷剤','must'); addDog('🧻','足拭きタオル','good'); }
+  if(rainBefore){ addDog('🧻','足拭きタオル','good'); addDog('🧥','レインコート','good'); }
+  if(night){ addDog('💡','ライト','must'); addDog('🦺','反射材','good'); }
 
-  function renderItems(items) {
-    return items.map(g => {
-      const [cls, txt] = badgeMap[g.badge];
+  // 飼い主用
+  const ownerItems=[];
+  const addOwner=(icon,label,badge)=>{
+    if(!ownerItems.find(x=>x.label===label)) ownerItems.push({icon,label,badge});
+  };
+  if(isMorning) addOwner('🧢','帽子','good');
+  if(isHot){
+    addOwner('🧢','帽子','must');
+    addOwner('💧','飲み物','must');
+    addOwner('❄️','冷感ネックリング','must');
+    addOwner('🧻','タオル','good');
+  }
+  if(isCold){
+    addOwner('🧥','上着','must');
+    addOwner('🧤','手袋','good');
+    addOwner('🧣','ネックウォーマー','good');
+  }
+  if(night){
+    addOwner('🔦','ライト','must');
+    addOwner('🦺','反射材','good');
+  }
+
+  const badgeMap={must:['badge-must','🟢 必須'],good:['badge-good','🟡 あると良い'],rec:['badge-rec','🔵 推奨']};
+  function items(list){
+    return list.map(g=>{
+      const [cls,txt]=badgeMap[g.badge]||badgeMap.rec;
       return `<div class="gear-item">
         <span class="gear-icon">${g.icon}</span>
         <span class="gear-label">${g.label}</span>
@@ -557,101 +686,54 @@ function buildGear(data, nowHour, hours, isToday, rainAfter) {
     }).join('');
   }
 
-  let html = `<div class="gear-section"><div class="section-title">持ち物・装備</div>`;
-  html += `<div class="gear-card"><div class="gear-card-title">🐶 犬用</div><div class="gear-list-inner">${renderItems(dogGear)}</div></div>`;
-  if (ownerGear.length) {
-    html += `<div class="gear-card"><div class="gear-card-title">👤 飼い主用</div><div class="gear-list-inner">${renderItems(ownerGear)}</div></div>`;
+  let html=`<div class="gear-section">`;
+  html+=`<div class="section-title">持ち物・装備（${h}時）</div>`;
+  html+=`<div class="gear-card"><div class="gear-card-title">🐶 犬用</div><div class="gear-list-inner">${items(dogItems)}</div></div>`;
+  if(ownerItems.length){
+    html+=`<div class="gear-card"><div class="gear-card-title">👤 飼い主用</div><div class="gear-list-inner">${items(ownerItems)}</div></div>`;
   }
-  html += `</div>`;
-  return html;
-}
-
-// ── アドバイスバナー ──────────────────────────────────────
-function buildAdvice(data, nowHour, hours, isToday, rainAfter) {
-  let html = '';
-  const future = hours.filter(x => !x.isPast && x.d);
-
-  if (rainAfter) {
-    html += `<div class="advice rain">
-      <b>☔ 雨上がりです</b>
-      <ul>
-        <li>草むら注意！足やお腹が濡れる可能性があります</li>
-        <li>帰宅後に足拭きタオルを準備しておこう</li>
-        <li>肉球チェックも忘れずに🐾</li>
-      </ul>
-    </div>`;
-  }
-
-  const hasHeat = future.some(x => x.level >= LEVEL.ORANGE && x.d.temp >= 25);
-  if (hasHeat) {
-    html += `<div class="advice heat">
-      <b>☀️ 暑さ・日差しに要注意</b>
-      <ul>
-        <li>冷感ネックリングをつけてあげよう</li>
-        <li>帽子・日陰ルートを意識して</li>
-        <li>水を持参して、こまめに水分補給💧</li>
-        <li>出発前にアスファルトを手で触って確認</li>
-      </ul>
-    </div>`;
-  }
-
-  const hasCold = future.some(x => x.level >= LEVEL.ORANGE && x.d.temp <= 5);
-  if (hasCold) {
-    html += `<div class="advice cold">
-      <b>🧊 寒さに注意</b>
-      <ul>
-        <li>ぽんずのウェアや靴下も検討してみてね</li>
-        <li>短め・速歩きで体を温める散歩がおすすめ</li>
-        <li>帰宅後は体を温めてあげよう🐶</li>
-      </ul>
-    </div>`;
-  }
-
-  return html;
+  html+=`</div>`;
+  document.getElementById('gear-section').innerHTML=html;
 }
 
 // ── 設定モーダル ─────────────────────────────────────────
-function openSettingsModal() {
-  const current = dogProfile.heatSensitivity || 'normal';
-  document.querySelectorAll('.sens-btn').forEach(btn => {
-    btn.classList.toggle('selected', btn.dataset.val === current);
-  });
-  document.getElementById('modalBackdrop').classList.remove('hidden');
+function openSensModal(){
+  const cur=dogProfile.heatSensitivity||'normal';
+  document.querySelectorAll('.sens-btn').forEach(b=>b.classList.toggle('selected',b.dataset.val===cur));
+  document.getElementById('sensModal').classList.remove('hidden');
 }
-
-function closeModal() {
-  document.getElementById('modalBackdrop').classList.add('hidden');
-}
-
-document.querySelectorAll('.sens-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.sens-btn').forEach(b => b.classList.remove('selected'));
+document.querySelectorAll('.sens-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.sens-btn').forEach(b=>b.classList.remove('selected'));
     btn.classList.add('selected');
   });
 });
+document.getElementById('sensSave').addEventListener('click',()=>{
+  const sel=document.querySelector('.sens-btn.selected');
+  if(sel){ dogProfile.heatSensitivity=sel.dataset.val; saveProfile(dogProfile); }
+  document.getElementById('sensModal').classList.add('hidden');
+  if(appData) renderDay(activeDay);
+});
+document.getElementById('sensModal').addEventListener('click',e=>{
+  if(e.target===document.getElementById('sensModal')) document.getElementById('sensModal').classList.add('hidden');
+});
+document.getElementById('settingsBtn').addEventListener('click',openSensModal);
 
-document.getElementById('modalSave').addEventListener('click', () => {
-  const selected = document.querySelector('.sens-btn.selected');
-  if (selected) {
-    dogProfile.heatSensitivity = selected.dataset.val;
-    saveProfile(dogProfile);
-  }
-  closeModal();
-  if (appData) renderDay(activeDay);
+// ── 判定基準モーダル ──────────────────────────────────────
+document.getElementById('infoBtn').addEventListener('click',()=>{
+  document.getElementById('infoModal').classList.remove('hidden');
+});
+document.getElementById('infoClose').addEventListener('click',()=>{
+  document.getElementById('infoModal').classList.add('hidden');
+});
+document.getElementById('infoModal').addEventListener('click',e=>{
+  if(e.target===document.getElementById('infoModal')) document.getElementById('infoModal').classList.add('hidden');
 });
 
-document.getElementById('modalBackdrop').addEventListener('click', e => {
-  if (e.target === document.getElementById('modalBackdrop')) closeModal();
-});
-
-document.getElementById('settingsBtn').addEventListener('click', openSettingsModal);
-
-// 初回設定
-if (!dogProfile.heatSensitivity) openSettingsModal();
-
-// ── 起動 ─────────────────────────────────────────────────
+// ── 初回設定 & 起動 ──────────────────────────────────────
+if(!dogProfile.heatSensitivity) openSensModal();
 loadForecast();
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
 </script>
 </body>
 </html>
