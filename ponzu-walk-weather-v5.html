@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#7FA889">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ぽんずさんぽ">
+<title>ぽんずさんぽ</title>
+<link rel="manifest" href="ponzu-walk-weather-manifest.webmanifest">
+<link rel="apple-touch-icon" href="ponzu-walk-weather-icon-180.png">
+<link rel="icon" type="image/png" href="ponzu-walk-weather-favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF1EA;
+  --panel:#fff;
+  --ink:#30322D;
+  --muted:#888B7E;
+  --line:#E0DDD2;
+  --soft:#F7F6EF;
+  --sage:#7FA889;   --sage-s:#E4EFE3;
+  --coral:#EFA888;  --coral-s:#FBE9E0;
+  --sky:#8FBED4;    --sky-s:#E4F0F4;
+  --amber:#E5B65C;  --amber-s:#FBF1DC;
+  --rose:#DD9A9A;   --rose-s:#FBEAE9;
+  --lavender:#B6A4D6;
+  --shadow:0 4px 18px rgba(48,50,45,.08);
+  --shadow-sm:0 2px 8px rgba(48,50,45,.05);
+}
+*{ box-sizing:border-box; }
+body{
+  margin:0; min-height:100vh;
+  background:linear-gradient(165deg,#F5F7F0 0%,var(--bg) 60%,#E8EDE4 100%);
+  color:var(--ink);
+  font-family:'Zen Kaku Gothic New','Hiragino Sans',sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.app{ max-width:480px; margin:0 auto; padding:20px 16px calc(56px + env(safe-area-inset-bottom)); }
+
+/* ── header ── */
+.header{ margin-bottom:16px; }
+.eyebrow{ margin:0 0 4px; font-size:11px; font-weight:700; letter-spacing:.18em; color:var(--muted); font-family:'Zen Maru Gothic',sans-serif; }
+h1{ margin:0 0 4px; font-size:22px; font-weight:900; font-family:'Zen Maru Gothic',sans-serif; }
+.location-line{ font-size:12px; color:var(--muted); }
+
+/* ── day tabs ── */
+.day-tabs{
+  display:grid; grid-template-columns:1fr 1fr; gap:6px;
+  margin-bottom:16px;
+}
+.day-tab{
+  border:1px solid var(--line); border-radius:14px;
+  padding:10px 0; text-align:center; cursor:pointer;
+  background:var(--panel); font-family:'Zen Maru Gothic',sans-serif;
+  transition:all .15s;
+}
+.day-tab .dt-label{ font-size:11px; color:var(--muted); font-weight:700; }
+.day-tab .dt-date{ font-size:14px; font-weight:900; margin:2px 0; }
+.day-tab .dt-weather{ font-size:20px; line-height:1; }
+.day-tab.active{ background:var(--sage); border-color:var(--sage); color:#fff; }
+.day-tab.active .dt-label{ color:rgba(255,255,255,.8); }
+
+/* ── hero card ── */
+.hero{
+  background:var(--panel); border:1px solid var(--line);
+  border-radius:20px; padding:18px 18px 16px;
+  margin-bottom:14px; box-shadow:var(--shadow);
+  position:relative; overflow:hidden;
+}
+.hero::before{
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(135deg, var(--hero-accent,#E4EFE3) 0%, transparent 55%);
+  pointer-events:none;
+}
+.hero-label{ font-size:11px; font-weight:700; letter-spacing:.12em; color:var(--muted); margin-bottom:6px; font-family:'Zen Maru Gothic',sans-serif; }
+.hero-main{ display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+.hero-icon{ font-size:40px; line-height:1; flex-shrink:0; }
+.hero-text h2{ margin:0 0 2px; font-size:20px; font-weight:900; font-family:'Zen Maru Gothic',sans-serif; line-height:1.2; }
+.hero-text p{ margin:0; font-size:13px; color:var(--muted); line-height:1.5; }
+.hero-detail{ display:flex; gap:10px; flex-wrap:wrap; }
+.hero-chip{
+  background:rgba(255,255,255,.7); border:1px solid var(--line);
+  border-radius:999px; padding:4px 10px; font-size:12px; font-weight:700;
+}
+
+/* ── ranking ── */
+.ranking{ margin-bottom:14px; }
+.section-title{
+  font-family:'Zen Maru Gothic',sans-serif; font-size:13px; font-weight:900;
+  color:var(--muted); margin:0 0 8px; display:flex; align-items:center; gap:8px; letter-spacing:.05em;
+}
+.section-title::after{ content:""; height:1px; flex:1; background:var(--line); }
+
+.rank-list{ display:grid; gap:7px; }
+.rank-item{
+  background:var(--panel); border:1px solid var(--line);
+  border-radius:14px; padding:10px 14px;
+  display:grid; grid-template-columns:28px 1fr auto;
+  align-items:center; gap:10px; box-shadow:var(--shadow-sm);
+}
+.rank-item.rank-1{ border-left:4px solid var(--sage); background:var(--sage-s); }
+.rank-item.rank-2{ border-left:4px solid var(--sky); }
+.rank-item.rank-3{ border-left:4px solid var(--amber); }
+.rank-num{ font-family:'Zen Maru Gothic',sans-serif; font-size:16px; font-weight:900; color:var(--muted); text-align:center; }
+.rank-item.rank-1 .rank-num{ color:var(--sage); }
+.rank-item.rank-2 .rank-num{ color:var(--sky); }
+.rank-item.rank-3 .rank-num{ color:var(--amber); }
+.rank-body .rank-hour{ font-size:15px; font-weight:900; font-family:'Zen Maru Gothic',sans-serif; }
+.rank-body .rank-sub{ font-size:12px; color:var(--muted); margin-top:1px; }
+.rank-score{
+  font-size:22px; font-weight:900; font-family:'Zen Maru Gothic',sans-serif;
+  color:var(--sage);
+}
+.no-walk{
+  background:var(--rose-s); border:1px solid var(--rose);
+  border-radius:14px; padding:14px 16px; text-align:center;
+  font-size:14px; font-weight:700; color:var(--rose);
+}
+
+/* ── gear list ── */
+.gear-list{
+  background:var(--panel); border:1px solid var(--line);
+  border-radius:14px; padding:12px 14px; margin-bottom:14px;
+  box-shadow:var(--shadow-sm);
+}
+.gear-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:6px; margin-top:8px; }
+.gear-item{
+  display:flex; align-items:center; gap:8px;
+  padding:8px 10px; border-radius:10px; font-size:13px;
+  background:var(--soft); border:1px solid var(--line);
+}
+.gear-item.must{ background:var(--sage-s); border-color:var(--sage); font-weight:700; }
+.gear-icon{ font-size:18px; line-height:1; flex-shrink:0; }
+
+/* ── hour timeline ── */
+.timeline{ margin-bottom:14px; }
+.tl-windows{ display:grid; gap:10px; }
+.tl-window{
+  background:var(--panel); border:1px solid var(--line);
+  border-radius:14px; padding:12px 14px; box-shadow:var(--shadow-sm);
+}
+.tl-window-label{ font-size:12px; font-weight:700; color:var(--muted); margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+.chips{ display:grid; grid-template-columns:repeat(4,1fr); gap:5px; }
+.chip{
+  border-radius:10px; border:1px solid var(--line);
+  padding:7px 3px; text-align:center; background:#fff;
+  transition:transform .1s;
+}
+.chip.ok{ background:var(--sage-s); border-color:var(--sage); }
+.chip.caution{ background:var(--amber-s); border-color:var(--amber); }
+.chip.no{ background:var(--rose-s); border-color:var(--rose); }
+.chip.past{ opacity:.38; }
+.chip .c-hour{ font-size:11px; color:var(--muted); font-weight:700; display:block; }
+.chip .c-icon{ font-size:16px; display:block; margin:2px 0; }
+.chip .c-temp{ font-size:12px; font-weight:700; display:block; }
+.chip .c-road{ font-size:9px; color:var(--muted); display:block; }
+.chip .c-mark{ font-size:12px; font-weight:900; display:block; }
+.chip.ok .c-mark{ color:var(--sage); }
+.chip.caution .c-mark{ color:var(--amber); }
+.chip.no .c-mark{ color:var(--rose); }
+
+/* ── advice banners ── */
+.advice{
+  border-radius:14px; padding:12px 14px; margin-bottom:10px;
+  font-size:13px; line-height:1.6; border:1px solid transparent;
+}
+.advice.rain{ background:#EEF4FB; border-color:#9FC2E0; }
+.advice.heat{ background:var(--amber-s); border-color:var(--amber); }
+.advice.cold{ background:var(--sky-s); border-color:var(--sky); }
+.advice b{ display:block; margin-bottom:4px; font-family:'Zen Maru Gothic',sans-serif; }
+.advice ul{ margin:2px 0 0; padding:0 0 0 16px; font-size:12px; }
+.advice ul li{ margin-bottom:1px; }
+
+/* ── note / loading / error ── */
+.updated{ font-size:11px; color:var(--muted); margin:0 0 14px; }
+.loading{ text-align:center; color:var(--muted); padding:40px 0; font-size:14px; }
+.error{ background:var(--rose-s); border:1px solid var(--rose); border-radius:14px; padding:14px; font-size:13px; }
+.error button{ margin-top:8px; border:1px solid var(--rose); background:#fff; border-radius:999px; padding:6px 14px; font-size:12px; font-weight:700; cursor:pointer; }
+.note{ font-size:11px; color:var(--muted); line-height:1.7; margin-top:18px; }
+
+.hidden{ display:none !important; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <p class="eyebrow">WALK CONCIERGE</p>
+    <h1>🐾 ぽんずさんぽ</h1>
+    <p class="location-line" id="locationLine">位置情報を取得中…</p>
+  </div>
+
+  <div class="day-tabs" id="dayTabs"></div>
+
+  <div id="main" class="loading">📍 位置情報を取得中…</div>
+
+  <p class="note">
+    スコアは気温・路面温度（気温＋日射推定）・湿度・風速・降水確率から算出。路面42℃以上/降水確率50%以上/風10m/s以上 → ✕。気温28℃以上/路面38℃以上/湿度85%以上 → △。<br>
+    データ提供：Open-Meteo
+  </p>
+</div>
+
+<script>
+const FALLBACK_LAT = 35.5384, FALLBACK_LON = 139.6813;
+const RAIN_CODES = new Set([51,53,55,56,57,61,63,65,66,67,71,73,75,77,80,81,82,85,86,95,96,99]);
+const WALK_HOURS = [5,6,7,8,9,17,18,19,20]; // 判定対象時間
+
+function wIcon(code){
+  if(code===0)return"☀️"; if(code===1)return"🌤️"; if(code===2)return"⛅"; if(code===3)return"☁️";
+  if(code===45||code===48)return"🌫️";
+  if([51,53,55,56,57].includes(code))return"🌦️";
+  if([61,63,65,66,67,80,81,82].includes(code))return"🌧️";
+  if([71,73,75,77,85,86].includes(code))return"🌨️";
+  if([95,96,99].includes(code))return"⛈️";
+  return"❓";
+}
+function roadTemp(temp, code){ return temp + (code===0?12:code===1?8:code===2?5:code===3?2:0); }
+
+// スコア計算（0〜100、高いほど良い）
+function calcScore({ temp, code, precip, humidity, wind }){
+  if(RAIN_CODES.has(code)||precip>=50) return 0;
+  const road = roadTemp(temp, code);
+  if(road>=42||wind>=10) return 0;
+
+  let score = 100;
+  // 気温ペナルティ
+  if(temp>=30) score -= 60;
+  else if(temp>=28) score -= 35;
+  else if(temp>=26) score -= 15;
+  else if(temp<=5) score -= 40;
+  else if(temp<=10) score -= 20;
+  else if(temp<=15) score -= 5;
+  // 路面ペナルティ
+  if(road>=38) score -= 25;
+  else if(road>=32) score -= 10;
+  // 湿度ペナルティ
+  if(humidity>=90) score -= 20;
+  else if(humidity>=80) score -= 10;
+  // 風ペナルティ
+  if(wind>=8) score -= 15;
+  else if(wind>=5) score -= 5;
+  // 降水確率ペナルティ
+  score -= Math.round(precip * 0.5);
+
+  return Math.max(0, Math.min(100, score));
+}
+
+function judgeFromScore(score){
+  if(score===0) return "no";
+  if(score>=70) return "ok";
+  return "caution";
+}
+
+function hourLabel(h){ return `${h}:00`; }
+function windowLabel(h){ return h<12 ? "🌅 朝の散歩" : "🌇 夕方の散歩"; }
+
+function getLocation(){
+  return new Promise(resolve=>{
+    if(!("geolocation" in navigator)){ resolve({lat:FALLBACK_LAT,lon:FALLBACK_LON,source:"fallback"}); return; }
+    navigator.geolocation.getCurrentPosition(
+      p=>resolve({lat:p.coords.latitude,lon:p.coords.longitude,source:"gps"}),
+      ()=>resolve({lat:FALLBACK_LAT,lon:FALLBACK_LON,source:"fallback"}),
+      {enableHighAccuracy:false,timeout:8000,maximumAge:600000}
+    );
+  });
+}
+
+// ===== 状態 =====
+let appData = null; // { byDate, days, nowInfo, loc }
+let activeDay = 0;  // 0=今日, 1=明日
+
+// ===== メインロード =====
+async function loadForecast(){
+  const main = document.getElementById("main");
+  main.className = "loading"; main.textContent = "📍 位置情報を取得中…";
+  try{
+    const loc = await getLocation();
+    main.textContent = "⛅ 天気予報を取得中…";
+
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&hourly=temperature_2m,precipitation_probability,weathercode,relative_humidity_2m,wind_speed_10m&timezone=Asia%2FTokyo&forecast_days=3`;
+    const res = await fetch(url);
+    if(!res.ok) throw new Error();
+    const data = await res.json();
+
+    const times=data.hourly.time, temps=data.hourly.temperature_2m,
+          precs=data.hourly.precipitation_probability, codes=data.hourly.weathercode,
+          hums=data.hourly.relative_humidity_2m, winds=data.hourly.wind_speed_10m;
+
+    const byDate={};
+    times.forEach((t,idx)=>{
+      const [dp,tp]=t.split("T"); const h=parseInt(tp);
+      if(!byDate[dp]) byDate[dp]={};
+      byDate[dp][h]={temp:temps[idx],code:codes[idx],precip:precs[idx],humidity:hums[idx],wind:winds[idx]};
+    });
+
+    const now=new Date(), pad=n=>String(n).padStart(2,"0");
+    const mkStr=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    const tom=new Date(now.getTime()+86400000), aft=new Date(now.getTime()+172800000);
+    const todayStr=mkStr(now), tomStr=mkStr(tom), aftStr=mkStr(aft);
+    const nowInfo={dateStr:todayStr,hour:now.getHours()};
+    const dowL=["日","月","火","水","木","金","土"];
+
+    const days=[
+      {dateStr:todayStr,date:now,label:"今日",dow:dowL[now.getDay()]},
+      {dateStr:tomStr,date:tom,label:"明日",dow:dowL[tom.getDay()]},
+      {dateStr:aftStr,date:aft,label:"明後日",dow:dowL[aft.getDay()]}
+    ];
+
+    appData={byDate,days,nowInfo,loc};
+
+    // location line
+    const locLabel=loc.source==="gps"?"現在地":loc.source==="geocache"?loc.label:"矢向（デフォルト）";
+    document.getElementById("locationLine").textContent=`📍 ${locLabel} ／ ${now.getMonth()+1}/${now.getDate()} ${pad(now.getHours())}:${pad(now.getMinutes())}取得`;
+
+    // day tabs
+    renderDayTabs();
+    renderDay(0);
+
+  }catch(e){
+    main.className=""; main.innerHTML=`<div class="error">天気予報を取得できなかったよ。<br><button onclick="loadForecast()">再読み込み</button></div>`;
+  }
+}
+
+function renderDayTabs(){
+  const el=document.getElementById("dayTabs");
+  const {byDate,days,nowInfo}=appData;
+  el.innerHTML=days.map((day,i)=>{
+    const data=byDate[day.dateStr]||{};
+    const scores=WALK_HOURS.map(h=>data[h]?calcScore(data[h]):0);
+    const bestScore=Math.max(...scores);
+    const judge=judgeFromScore(bestScore);
+    const repCode=data[12]?data[12].code:(data[9]?data[9].code:0);
+    const icon=wIcon(repCode);
+    const past=day.dateStr===nowInfo.dateStr;
+    return `<button class="day-tab${i===activeDay?" active":""}" onclick="renderDay(${i})">
+      <div class="dt-label">${past?"今日":day.label}（${day.dow}）</div>
+      <div class="dt-weather">${icon}</div>
+      <div class="dt-date">${day.date.getMonth()+1}/${day.date.getDate()}</div>
+    </button>`;
+  }).join("");
+}
+
+function renderDay(idx){
+  activeDay=idx;
+  // タブアクティブ更新
+  document.querySelectorAll(".day-tab").forEach((t,i)=>t.classList.toggle("active",i===idx));
+
+  const {byDate,days,nowInfo}=appData;
+  const day=days[idx];
+  const data=byDate[day.dateStr]||{};
+  const nowHour=nowInfo.hour;
+  const isToday=day.dateStr===nowInfo.dateStr;
+
+  // 歩ける時間帯のスコアを計算
+  const scored=WALK_HOURS.map(h=>{
+    const d=data[h];
+    if(!d) return null;
+    const score=calcScore(d);
+    const judge=judgeFromScore(score);
+    const isPast=isToday && h<=nowHour;
+    return{h,d,score,judge,isPast,road:Math.round(roadTemp(d.temp,d.code))};
+  }).filter(Boolean);
+
+  // 未来のみランキング対象
+  const future=scored.filter(s=>!s.isPast);
+  const rankable=future.filter(s=>s.score>0).sort((a,b)=>b.score-a.score);
+
+  const main=document.getElementById("main");
+  main.className="";
+
+  let html="";
+
+  // ── Hero ──
+  html+=buildHero(rankable,day,isToday,data,nowHour);
+
+  // ── Advice banners ──
+  html+=buildAdvice(data,nowHour,scored);
+
+  // ── Ranking ──
+  html+=buildRanking(rankable);
+
+  // ── 持ち物 ──
+  html+=buildGear(data,nowHour,scored,isToday);
+
+  // ── 時間帯チップ ──
+  html+=buildTimeline(scored);
+
+  main.innerHTML=html;
+}
+
+function buildHero(rankable,day,isToday,data,nowHour){
+  if(rankable.length===0){
+    return`<div class="hero" style="--hero-accent:var(--rose-s)">
+      <div class="hero-label">TODAY'S STATUS</div>
+      <div class="hero-main">
+        <div class="hero-icon">😢</div>
+        <div class="hero-text">
+          <h2>今日の散歩は厳しそう</h2>
+          <p>雨・高温・強風などにより、<br>お散歩に向いていない時間帯が多いです。</p>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  const best=rankable[0];
+  const score=best.score;
+  const emoji=score>=85?"🌟":score>=70?"😊":score>=50?"🙂":"😐";
+  const msg=score>=85?"今日は最高の散歩日和！":score>=70?"お散歩にいい時間があるよ":score>=50?"様子を見ながら行けるよ":"条件はやや厳しめ、短めに";
+  const accent=score>=70?"var(--sage-s)":score>=50?"var(--amber-s)":"var(--coral-s)";
+  const bestD=best.d;
+  const bestLabel=best.h<12?"朝":"夕方";
+
+  return`<div class="hero" style="--hero-accent:${accent}">
+    <div class="hero-label">${isToday?"TODAY":"TOMORROW"}'S BEST</div>
+    <div class="hero-main">
+      <div class="hero-icon">${emoji}</div>
+      <div class="hero-text">
+        <h2>${msg}</h2>
+        <p>${bestLabel} ${best.h}時台がいちばんおすすめ 🐾</p>
+      </div>
+    </div>
+    <div class="hero-detail">
+      <span class="hero-chip">${wIcon(bestD.code)} ${Math.round(bestD.temp)}°C</span>
+      <span class="hero-chip">💧 湿度${bestD.humidity}%</span>
+      <span class="hero-chip">🌬 風${bestD.wind.toFixed(1)}m/s</span>
+      <span class="hero-chip">🛣 路面${best.road}°</span>
+    </div>
+  </div>`;
+}
+
+function buildAdvice(data, nowHour, scored){
+  let html="";
+
+  // 雨上がり判定（直前3時間）
+  let rainAfter=false;
+  for(let h=Math.max(0,nowHour-3);h<nowHour;h++){
+    if(data[h]&&RAIN_CODES.has(data[h].code)){rainAfter=true;break;}
+  }
+  if(rainAfter){
+    html+=`<div class="advice rain">
+      <b>☔ 雨上がりです</b>
+      <ul>
+        <li>草むら注意！足やお腹が濡れる可能性があります</li>
+        <li>帰宅後に足拭きタオルを準備しておこう</li>
+        <li>肉球チェックも忘れずに🐾</li>
+      </ul>
+    </div>`;
+  }
+
+  // 暑さ判定
+  const hotHours=scored.filter(s=>!s.isPast&&s.d.temp>=26&&(s.d.code===0||s.d.code===1));
+  if(hotHours.length){
+    html+=`<div class="advice heat">
+      <b>☀️ 暑さ・日差しに要注意</b>
+      <ul>
+        <li>冷感ネックリングをつけてあげよう</li>
+        <li>帽子・日陰ルートを意識して</li>
+        <li>水を持参して、こまめに水分補給💧</li>
+        <li>出発前にアスファルトを手で触って確認</li>
+      </ul>
+    </div>`;
+  }
+
+  // 寒さ判定
+  const coldHours=scored.filter(s=>!s.isPast&&s.d.temp<=8);
+  if(coldHours.length){
+    html+=`<div class="advice cold">
+      <b>🧊 寒さに注意</b>
+      <ul>
+        <li>ぽんずのウェアや靴下も検討してみてね</li>
+        <li>短め・速歩きで体を温める散歩がおすすめ</li>
+        <li>帰宅後は体を温めてあげよう🐶</li>
+      </ul>
+    </div>`;
+  }
+
+  return html;
+}
+
+function buildRanking(rankable){
+  if(rankable.length===0){
+    return`<div class="section-title">おすすめ時間ランキング</div>
+    <div class="no-walk">🌧 今の時間帯以降、散歩に向いている時間がないかも。<br>無理せず今日はお休みでもいいよ。</div>`;
+  }
+
+  const top=rankable.slice(0,3);
+  const rows=top.map((s,i)=>{
+    const wl=s.h<12?"🌅 朝":"🌇 夕方";
+    const sub=`${wIcon(s.d.code)} ${Math.round(s.d.temp)}°  路面${s.road}°  湿度${s.d.humidity}%`;
+    const rankClass=`rank-${i+1}`;
+    const medal=i===0?"🥇":i===1?"🥈":"🥉";
+    return`<div class="rank-item ${rankClass}">
+      <div class="rank-num">${medal}</div>
+      <div class="rank-body">
+        <div class="rank-hour">${wl} ${s.h}:00〜</div>
+        <div class="rank-sub">${sub}</div>
+      </div>
+      <div class="rank-score">${s.score}</div>
+    </div>`;
+  }).join("");
+
+  return`<div class="ranking">
+    <div class="section-title">おすすめ時間ランキング</div>
+    <div class="rank-list">${rows}</div>
+  </div>`;
+}
+
+function buildGear(data, nowHour, scored, isToday){
+  // 次の散歩時間帯の条件を参考に装備を出す
+  const next=scored.find(s=>!s.isPast&&s.score>0);
+  const refD=next?next.d:(scored.length?scored[0].d:null);
+  if(!refD) return"";
+
+  const gear=[];
+  // 必須
+  gear.push({icon:"💩",label:"うんち袋",must:true});
+  gear.push({icon:"🪣",label:"携帯水容器",must:true});
+  // 条件付き
+  if(refD.temp>=26) gear.push({icon:"💧",label:"水（飼い主用も）",must:true});
+  if(refD.temp>=24) gear.push({icon:"❄️",label:"冷感ネックリング",must:refD.temp>=28});
+  if(refD.code===0||refD.code===1) gear.push({icon:"🕶",label:"UVカット帽子",must:false});
+  if(RAIN_CODES.has(refD.code)||refD.precip>=30) gear.push({icon:"☂️",label:"雨具・カッパ",must:true});
+
+  // 雨上がり
+  let rainAfter=false;
+  for(let h=Math.max(0,nowHour-3);h<nowHour;h++){
+    if(data[h]&&RAIN_CODES.has(data[h].code)){rainAfter=true;break;}
+  }
+  if(rainAfter) gear.push({icon:"🧻",label:"足拭きタオル",must:true});
+
+  if(refD.temp<=10) gear.push({icon:"🧥",label:"ぽんずのウェア",must:false});
+  if(refD.wind>=5) gear.push({icon:"🌬",label:"風対策（軽いもの）",must:false});
+
+  const items=gear.map(g=>`
+    <div class="gear-item${g.must?" must":""}">
+      <span class="gear-icon">${g.icon}</span>
+      <span>${g.label}${g.must?" ✔":""}  </span>
+    </div>`).join("");
+
+  return`<div class="gear-list">
+    <div class="section-title" style="margin-bottom:8px">今日の持ち物チェック</div>
+    <div class="gear-grid">${items}</div>
+  </div>`;
+}
+
+function buildTimeline(scored){
+  const morning=scored.filter(s=>s.h<12);
+  const evening=scored.filter(s=>s.h>=12);
+
+  function window(label,items){
+    if(!items.length) return"";
+    const chips=items.map(s=>{
+      const mark=s.score===0?"✕":s.score>=70?"◯":"△";
+      return`<div class="chip ${s.judge}${s.isPast?" past":""}">
+        <span class="c-hour">${s.h}時</span>
+        <span class="c-icon">${wIcon(s.d.code)}</span>
+        <span class="c-temp">${Math.round(s.d.temp)}°</span>
+        <span class="c-road">路${s.road}°</span>
+        <span class="c-mark">${mark}</span>
+      </div>`;
+    }).join("");
+    return`<div class="tl-window">
+      <div class="tl-window-label">${label}</div>
+      <div class="chips">${chips}</div>
+    </div>`;
+  }
+
+  return`<div class="timeline">
+    <div class="section-title">時間帯ごとの快適度</div>
+    <div class="tl-windows">
+      ${window("🌅 朝（5〜9時台）",morning)}
+      ${window("🌇 夕方（17〜20時台）",evening)}
+    </div>
+  </div>`;
+}
+
+loadForecast();
+if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script>
+</body>
+</html>
