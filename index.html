@@ -314,6 +314,21 @@ const LEVEL_CLASS = ['lv0','lv1','lv2','lv3'];
 const LEVEL_LABEL = ['快適','少し注意','注意','危険'];
 const BADGE_CLS = ['badge-green','badge-yellow','badge-orange','badge-red'];
 
+function buildBadgeLabel(level, cause){
+  if(cause==='rain') return '☔ 雨・雪';
+  if(cause==='heat'){
+    if(level===LEVEL.RED)    return '🔥 危険な暑さ';
+    if(level===LEVEL.ORANGE) return '🌡️ 暑さ注意';
+    if(level===LEVEL.YELLOW) return '☀️ 少し暑め';
+  }
+  if(cause==='cold'){
+    if(level===LEVEL.RED)    return '🌨️ 危険な寒さ';
+    if(level===LEVEL.ORANGE) return '🧊 寒さ注意';
+    if(level===LEVEL.YELLOW) return '🍃 少し肌寒め';
+  }
+  return LEVEL_LABEL[level];
+}
+
 const WEATHER_NAME = {
   0:'快晴',1:'晴れ',2:'薄曇り',3:'くもり',
   45:'霧',48:'霧',
@@ -587,7 +602,7 @@ function renderGuide(data, isToday, nowHour){
       <div class="guide-header">
         <div class="guide-title-block">
           <p class="guide-title">🐶 ${h}時のお散歩ガイド</p>
-          <span class="guide-badge-label ${BADGE_CLS[level]}">${LEVEL_LABEL[level]}</span>
+          <span class="guide-badge-label ${BADGE_CLS[level]}">${buildBadgeLabel(level,cause)}</span>
         </div>
       </div>
       <div class="guide-stats">
@@ -610,12 +625,18 @@ function buildComment(level,cause,d,h,isPast,rainBefore){
     return `🌨️ 体感温度がとても低く危険です。無理せず今日はお家でゆっくりしよう。${past}`;
   }
   if(level===LEVEL.ORANGE){
-    if(cause==='heat') return `☀️ 熱中症や肉球やけどに注意しよう。アスファルトを手で触って確認してから出発してね。${past}`;
+    if(cause==='heat'){
+      if(rainBefore) return `🌈☀️ 雨上がりで蒸し暑いです。アスファルトも熱を持っているので熱中症・肉球やけどに注意。${past}`;
+      return `☀️ 熱中症や肉球やけどに注意しよう。アスファルトを手で触って確認してから出発してね。${past}`;
+    }
     if(cause==='cold') return `🧊 防寒をしっかりしてね。短めのお散歩がおすすめ。${past}`;
     return `⚠️ 天候に注意が必要です。様子を見ながら無理しないでね。${past}`;
   }
   if(level===LEVEL.YELLOW){
-    if(cause==='heat') return `🌤️ 少し暑めです。短めのお散歩がおすすめ。水を忘れずに。${past}`;
+    if(cause==='heat'){
+      if(rainBefore) return `🌈 雨上がりですが少し暑めです。地面が蒸れているかも。水を忘れずに。${past}`;
+      return `🌤️ 少し暑めです。短めのお散歩がおすすめ。水を忘れずに。${past}`;
+    }
     if(cause==='cold') return `🍃 少し肌寒いです。短めのお散歩がおすすめ。${past}`;
     return `🙂 短めのお散歩がおすすめ。無理しない範囲で楽しんでね。${past}`;
   }
