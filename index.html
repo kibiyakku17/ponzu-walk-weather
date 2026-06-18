@@ -739,21 +739,4 @@ document.getElementById('sensModal').addEventListener('click',e=>{
 });
 document.getElementById('settingsBtn').addEventListener('click',openSensModal);
 
-// ── 判定基準モーダル ──────────────────────────────────────
-document.getElementById('infoBtn').addEventListener('click',()=>{
-  document.getElementById('infoModal').classList.remove('hidden');
-});
-document.getElementById('infoClose').addEventListener('click',()=>{
-  document.getElementById('infoModal').classList.add('hidden');
-});
-document.getElementById('infoModal').addEventListener('click',e=>{
-  if(e.target===document.getElementById('infoModal')) document.getElementById('infoModal').classList.add('hidden');
-});
-
-// ── 初回設定 & 起動 ──────────────────────────────────────
-if(!dogProfile.heatSensitivity) openSensModal();
-loadForecast();
-if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
-</script>
-</body>
-</html>
+// ── 判定基準モーダル ─────────�
