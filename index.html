@@ -348,9 +348,12 @@ h1{ margin:0 0 4px; font-size:22px; font-weight:900; font-family:'Zen Maru Gothi
 .cal-day.saturday .cal-num-wrap span{ color:#3a7aa0; }
 .cal-thumb{
   width:100%; flex:1;
-  object-fit:cover; display:block;
+  object-fit:cover; object-position:50% 40%;
+  display:block;
   border-radius:0 0 8px 8px;
   margin-top:2px;
+  transform:scale(1.4);
+  transform-origin:50% 40%;
 }
 .cal-dot{ font-size:9px; margin-top:1px; }
 
@@ -799,6 +802,10 @@ function renderGear(data, nowHour){
   if(isHot){ addOwner('🧢','帽子','must'); addOwner('💧','飲み物','must'); addOwner('❄️','冷感ネックリング','must'); addOwner('🧻','タオル','good'); }
   if(isCold){ addOwner('🧥','上着','must'); addOwner('🧤','手袋','good'); addOwner('🧣','ネックウォーマー','good'); }
   if(night){ addOwner('🔦','ライト','must'); addOwner('🦺','反射材','good'); }
+  // 蚊の時期：5月〜10月（月インデックス 4〜9）
+  const currentMonth=new Date().getMonth();
+  const isMosquitoSeason=currentMonth>=4&&currentMonth<=9;
+  if(isMosquitoSeason) addOwner('🦟','虫除けスプレー','good');
   const badgeMap={must:['badge-must','🟢 必須'],good:['badge-good','🟡 あると良い'],rec:['badge-rec','🔵 推奨']};
   function items(list){ return list.map(g=>{ const [cls,txt]=badgeMap[g.badge]||badgeMap.rec;
     return `<div class="gear-item"><span class="gear-icon">${g.icon}</span><span class="gear-label">${g.label}</span><span class="gear-badge ${cls}">${txt}</span></div>`; }).join(''); }
