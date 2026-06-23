@@ -233,10 +233,32 @@ h1{ margin:0 0 4px; font-size:22px; font-weight:900; font-family:'Zen Maru Gothi
   transition:border-color .15s, background .15s;
   -webkit-tap-highlight-color:transparent;
 }
+.walk-action-btn{ position:relative; }
 .walk-action-btn:active{ background:var(--soft); }
 .action-emoji{ font-size:28px; display:block; margin-bottom:4px; }
 .action-count{ font-size:22px; font-weight:900; display:block; }
 .action-label{ font-size:12px; color:var(--muted); }
+.count-minus{
+  position:absolute; top:6px; right:6px;
+  width:34px; height:34px; border-radius:999px;
+  border:1.5px solid var(--line); background:var(--soft);
+  color:var(--muted); font-size:22px; font-weight:900; line-height:1;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; -webkit-tap-highlight-color:transparent;
+}
+.count-minus:active{ background:var(--line); }
+.count-minus.dim{ opacity:.35; }
+/* 保存済み記録の回数編集 */
+.detail-counts{ display:flex; gap:14px; margin-bottom:10px; }
+.count-edit{ display:flex; align-items:center; gap:6px; font-size:13px; font-weight:700; }
+.count-edit button{
+  width:28px; height:28px; border-radius:999px;
+  border:1px solid var(--line); background:var(--soft);
+  font-size:16px; font-weight:900; line-height:1; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; color:var(--ink);
+}
+.count-edit button:active{ background:var(--line); }
+.count-edit .ce-num{ min-width:18px; text-align:center; }
 
 .photo-btn-wrap{ margin:0 16px 14px; }
 .photo-btn{
@@ -421,11 +443,13 @@ h1{ margin:0 0 4px; font-size:22px; font-weight:900; font-family:'Zen Maru Gothi
     <div id="walkActionArea" class="hidden">
       <div class="walk-actions">
         <button class="walk-action-btn" onclick="addPoop()">
+          <span class="count-minus dim" id="poopMinus" role="button" aria-label="うんちを1減らす" onclick="event.stopPropagation();subPoop()">−</span>
           <span class="action-emoji">💩</span>
           <span class="action-count" id="poopCount">0</span>
           <span class="action-label">うんち</span>
         </button>
         <button class="walk-action-btn" onclick="addPee()">
+          <span class="count-minus dim" id="peeMinus" role="button" aria-label="おしっこを1減らす" onclick="event.stopPropagation();subPee()">−</span>
           <span class="action-emoji">💦</span>
           <span class="action-count" id="peeCount">0</span>
           <span class="action-label">おしっこ</span>
@@ -920,8 +944,8 @@ function startWalk(){
   document.getElementById('walkActionArea').classList.remove('hidden');
   document.getElementById('walkMainBtn').textContent='散歩おわり';
   document.getElementById('walkMainBtn').className='walk-main-btn stop';
-  document.getElementById('poopCount').textContent='0';
-  document.getElementById('peeCount').textContent='0';
+  syncCount('poops');
+  syncCount('pees');
   document.getElementById('photoPreviewWrap').classList.add('hidden');
   document.getElementById('photoBtnWrap').classList.remove('hidden');
   walkState.photo=null;
@@ -990,8 +1014,15 @@ function stopWalk(){
   renderWalkHistory();
 }
 
-function addPoop(){ walkState.poops++; document.getElementById('poopCount').textContent=walkState.poops; }
-function addPee(){ walkState.pees++; document.getElementById('peeCount').textContent=walkState.pees; }
+function syncCount(type){
+  const n=walkState[type];
+  if(type==='poops'){ document.getElementById('poopCount').textContent=n; document.getElementById('poopMinus').classList.toggle('dim',n<=0); }
+  else{ document.getElementById('peeCount').textContent=n; document.getElementById('peeMinus').classList.toggle('dim',n<=0); }
+}
+function addPoop(){ walkState.poops++; syncCount('poops'); }
+function subPoop(){ if(walkState.poops>0){ walkState.poops--; syncCount('poops'); } }
+function addPee(){ walkState.pees++; syncCount('pees'); }
+function subPee(){ if(walkState.pees>0){ walkState.pees--; syncCount('pees'); } }
 
 function openCamera(){ document.getElementById('cameraInput').click(); }
 
@@ -1128,8 +1159,18 @@ function openDayDetail(dateStr){
           <span class="detail-stat">⏱️ ${w.timeLabel}</span>
           <span class="detail-stat">🕐 ${formatDuration(w.duration)}</span>
           <span class="detail-stat">📍 ${dist}</span>
-          ${w.poops?`<span class="detail-stat">💩 ${w.poops}回</span>`:''}
-          ${w.pees?`<span class="detail-stat">💦 ${w.pees}回</span>`:''}
+        </div>
+        <div class="detail-counts">
+          <div class="count-edit">💩
+            <button aria-label="うんちを1減らす" onclick="editSavedCount('${w.id}','poops',-1,'${dateStr}')">−</button>
+            <span class="ce-num">${w.poops||0}</span>
+            <button aria-label="うんちを1増やす" onclick="editSavedCount('${w.id}','poops',1,'${dateStr}')">＋</button>
+          </div>
+          <div class="count-edit">💦
+            <button aria-label="おしっこを1減らす" onclick="editSavedCount('${w.id}','pees',-1,'${dateStr}')">−</button>
+            <span class="ce-num">${w.pees||0}</span>
+            <button aria-label="おしっこを1増やす" onclick="editSavedCount('${w.id}','pees',1,'${dateStr}')">＋</button>
+          </div>
         </div>
         <div class="detail-actions">
           <button class="detail-btn danger" onclick="deleteWalk('${w.id}','${dateStr}')">🗑️ 削除</button>
@@ -1153,6 +1194,16 @@ async function addPhotoToWalk(walkId, input){
   if(dateStr) openDayDetail(dateStr);
   renderCalendar();
   input.value='';
+}
+
+function editSavedCount(walkId, type, delta, dateStr){
+  const walks=loadWalks();
+  const walk=walks.find(w=>w.id===walkId);
+  if(!walk) return;
+  walk[type]=Math.max(0,(walk[type]||0)+delta);
+  saveWalks(walks);
+  openDayDetail(dateStr);
+  renderWalkHistory();
 }
 
 function deleteWalk(walkId, dateStr){
