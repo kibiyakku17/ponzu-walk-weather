@@ -260,6 +260,19 @@ h1{ margin:0 0 4px; font-size:22px; font-weight:900; font-family:'Zen Maru Gothi
 .count-edit button:active{ background:var(--line); }
 .count-edit .ce-num{ min-width:18px; text-align:center; }
 
+.walk-note-wrap{ margin:0 16px 14px; }
+.walk-note-input{
+  width:100%; box-sizing:border-box;
+  padding:10px 12px; border-radius:12px;
+  border:1.5px solid var(--line); background:var(--soft);
+  font-size:13px; font-family:inherit; color:var(--text);
+  resize:none; outline:none;
+  transition:border-color .2s;
+}
+.walk-note-input:focus{ border-color:var(--sky); }
+.walk-note-input::placeholder{ color:var(--muted); }
+.walk-item-note{ font-size:11px; color:var(--muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px; }
+.detail-note{ font-size:12px; color:var(--muted); margin-bottom:10px; line-height:1.5; white-space:pre-wrap; }
 .photo-btn-wrap{ margin:0 16px 14px; }
 .photo-btn{
   width:100%; padding:13px;
@@ -461,6 +474,9 @@ h1{ margin:0 0 4px; font-size:22px; font-weight:900; font-family:'Zen Maru Gothi
       <div class="photo-preview-wrap hidden" id="photoPreviewWrap">
         <img class="photo-preview" id="photoPreview" src="" alt="散歩の写真">
         <button class="photo-remove" onclick="removePhoto()">✕ 撮り直す</button>
+      </div>
+      <div class="walk-note-wrap">
+        <textarea id="walkNote" class="walk-note-input" placeholder="📝 備考（気になったこと・体調メモなど）" rows="2"></textarea>
       </div>
     </div>
 
@@ -935,7 +951,8 @@ function startWalk(){
   walkState.recording=true;
   walkState.startTime=Date.now();
   walkState.distance=0; walkState.poops=0; walkState.pees=0; walkState.photo=null;
-  walkState.lastPos=null;
+  walkState.lastPos=null; walkState.note='';
+  document.getElementById('walkNote').value='';
 
   // UI
   document.getElementById('walkIdleMsg').classList.add('hidden');
@@ -995,6 +1012,7 @@ function stopWalk(){
     pees: walkState.pees,
     photo: walkState.photo,
     timeLabel: timeLabel,
+    note: (document.getElementById('walkNote').value||'').trim(),
   };
 
   const walks=loadWalks();
@@ -1079,6 +1097,7 @@ function renderWalkHistory(){
       <div class="walk-item-info">
         <div class="walk-item-time">${w.timeLabel}</div>
         <div class="walk-item-stats">${stats}</div>
+        ${w.note?`<div class="walk-item-note">📝 ${w.note}</div>`:''}
       </div>
       <span class="walk-item-arrow">›</span>
     </div>`;
@@ -1172,6 +1191,7 @@ function openDayDetail(dateStr){
             <button aria-label="おしっこを1増やす" onclick="editSavedCount('${w.id}','pees',1,'${dateStr}')">＋</button>
           </div>
         </div>
+        ${w.note?`<div class="detail-note">📝 ${w.note}</div>`:''}
         <div class="detail-actions">
           <button class="detail-btn danger" onclick="deleteWalk('${w.id}','${dateStr}')">🗑️ 削除</button>
         </div>
